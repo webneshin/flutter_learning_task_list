@@ -14,7 +14,7 @@ void main() async {
   Hive.registerAdapter(PriorityAdapter());
   await Hive.openBox<Task>(BoxNames.task);
   SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(statusBarColor: Colors.deepPurple));
+      const SystemUiOverlayStyle(statusBarColor: Colors.deepPurple));
   runApp(const MainApp());
 }
 
@@ -26,9 +26,9 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-          colorScheme: ColorScheme.light(
+          colorScheme: const ColorScheme.light(
               primary: Color(0xff794CFF), background: Color(0xffF3F5F8))),
-      home: HomeScreen(),
+      home: const HomeScreen(),
     );
   }
 }
@@ -52,14 +52,14 @@ class HomeScreen extends StatelessWidget {
               ),
             ));
           },
-          label: Text("Add New Task"),
-          icon: Icon(Icons.add_circle)),
+          label: const Text("Add New Task"),
+          icon: const Icon(Icons.add_circle)),
       body: SafeArea(
         child: Column(
           children: [
             Container(
               height: 110,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                   gradient: LinearGradient(
                       colors: [Colors.purpleAccent, Colors.deepPurple])),
               child: Padding(
@@ -75,13 +75,13 @@ class HomeScreen extends StatelessWidget {
                             .titleLarge
                             ?.apply(color: Colors.white),
                       )),
-                      Icon(
+                      const Icon(
                         Icons.cloud_done,
                         color: Colors.white,
                       )
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 16,
                   ),
                   Container(
@@ -95,7 +95,7 @@ class HomeScreen extends StatelessWidget {
                               blurRadius: 20,
                               color: Colors.black.withOpacity(0.1)),
                         ]),
-                    child: TextField(
+                    child: const TextField(
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         prefixIconColor: Colors.black12,
@@ -113,7 +113,7 @@ class HomeScreen extends StatelessWidget {
                 valueListenable: box.listenable(),
                 builder: (context, box, child) {
                   return ListView.builder(
-                    padding: EdgeInsets.fromLTRB(16, 16, 16, 100),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                     itemCount: box.values.length + 1,
                     itemBuilder: (context, index) {
                       if (index == 0) {
@@ -126,7 +126,7 @@ class HomeScreen extends StatelessWidget {
                                 Text("Today",
                                     style:
                                         Theme.of(context).textTheme.bodyLarge),
-                                SizedBox(
+                                const SizedBox(
                                   height: 2,
                                 ),
                                 Container(
@@ -142,8 +142,8 @@ class HomeScreen extends StatelessWidget {
                               color: Colors.red.shade200,
                               disabledColor: Colors.grey.shade200,
                               elevation: 0,
-                              onPressed: box.values.length == 0 ? null : () {},
-                              child: Row(
+                              onPressed: box.values.isEmpty ? null : () {},
+                              child: const Row(
                                 children: [
                                   Text(
                                     "Delet all",
@@ -200,14 +200,14 @@ class _TaskItemState extends State<TaskItem> {
       },
       child: Container(
         height: 55,
-        padding: EdgeInsets.only(left: 16,),
-        margin: EdgeInsets.only(
+        padding: const EdgeInsets.only(left: 16,),
+        margin: const EdgeInsets.only(
           top: 10,
         ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(radiusSize),
           color: Colors.white,
-          boxShadow: [BoxShadow(blurRadius: 20, color: Colors.black12)],
+          boxShadow: const [BoxShadow(blurRadius: 20, color: Colors.black12)],
         ),
         child: Row(
           children: [
@@ -220,7 +220,7 @@ class _TaskItemState extends State<TaskItem> {
                 });
               },
             ),
-            SizedBox(
+            const SizedBox(
               width: 8,
             ),
             Expanded(
@@ -243,7 +243,7 @@ class _TaskItemState extends State<TaskItem> {
                         : widget.task.priority == Priority.low
                         ? Colors.blue
                         : Colors.white,
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(radiusSize),
                     bottomRight: Radius.circular(radiusSize),
 

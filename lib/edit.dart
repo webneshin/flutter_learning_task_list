@@ -7,7 +7,7 @@ import 'package:task_list/main.dart';
 class EditTaskScreen extends StatefulWidget {
   final Task task;
 
-  EditTaskScreen({super.key, required this.task});
+  const EditTaskScreen({super.key, required this.task});
 
   @override
   State<EditTaskScreen> createState() => _EditTaskScreenState();
@@ -21,7 +21,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Edit Task"),
+        title: const Text("Edit Task"),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
@@ -38,8 +38,8 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
           }
           Navigator.of(context).pop();
         },
-        label: Text("Save Change"),
-        icon: Icon(Icons.check_circle),
+        label: const Text("Save Change"),
+        icon: const Icon(Icons.check_circle),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -61,7 +61,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                       color: Colors.blue,
                       isSelected: widget.task.priority == Priority.low),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Flexible(
                   flex: 1,
                   child: PriorityCheckbox(
@@ -74,7 +74,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
                       color: Colors.green,
                       isSelected: widget.task.priority == Priority.normal),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Flexible(
                   flex: 1,
                   child: PriorityCheckbox(
@@ -92,7 +92,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
             TextField(
               controller: _controller,
               decoration:
-                  InputDecoration(label: Text("Add a task for today ...")),
+                  const InputDecoration(label: Text("Add a task for today ...")),
             )
           ],
         ),
