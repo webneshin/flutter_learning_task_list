@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:task_list/data.dart';
+import 'package:task_list/edit.dart';
+
 
 class BoxNames {
   static const task = 'tasks';
@@ -46,7 +48,7 @@ class HomeScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
             Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => EditTaskScreen(),
+              builder: (context) => EditTaskScreen(task: Task(),),
             ));
           },
           label: Text("Add New Task"),
@@ -230,47 +232,8 @@ class _TaskItemState extends State<TaskItem> {
   }
 }
 
-class EditTaskScreen extends StatelessWidget {
-  // const EditTaskScreen({super.key});
-  final TextEditingController _controller = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Edit Task"),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Task task = Task();
-          task.name = _controller.text;
-          task.priority = Priority.low;
-          if (task.isInBox) {
-            task.save();
-          } else {
-            final Box<Task> box = Hive.box(BoxNames.task);
-            box.add(task);
-          }
-          Navigator.of(context).pop();
-        },
-        label: Text("Save Change"),
-        icon: Icon(Icons.check_circle),
-      ),
-      body: Column(
-        children: [
-          TextField(
-            controller: _controller,
-            decoration:
-                InputDecoration(label: Text("Add a task for today ...")),
-          )
-        ],
-      ),
-    );
-  }
-}
-
 class MyCheckBox extends StatelessWidget {
-  final double size = 16;
+  final double size = 20;
   final bool value;
 
   const MyCheckBox({super.key, required this.value});

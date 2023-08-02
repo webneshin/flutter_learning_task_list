@@ -9,7 +9,7 @@ class Task extends HiveObject{
   @HiveField(1)
   bool isCompleted=false;
   @HiveField(2)
-  Priority priority=Priority.low;
+  Priority priority=Priority.normal;
 }
 
 @HiveType(typeId:1)

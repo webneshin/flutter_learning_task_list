@@ -1,0 +1,142 @@
+import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:task_list/data.dart';
+import 'package:task_list/helper.dart';
+import 'package:task_list/main.dart';
+
+class EditTaskScreen extends StatefulWidget {
+  final Task task;
+
+  EditTaskScreen({super.key, required this.task});
+
+  @override
+  State<EditTaskScreen> createState() => _EditTaskScreenState();
+}
+
+class _EditTaskScreenState extends State<EditTaskScreen> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Edit Task"),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Task task = Task();
+          task.name = _controller.text;
+          task.priority = Priority.low;
+          if (task.isInBox) {
+            task.save();
+          } else {
+            final Box<Task> box = Hive.box(BoxNames.task);
+            box.add(task);
+          }
+          Navigator.of(context).pop();
+        },
+        label: Text("Save Change"),
+        icon: Icon(Icons.check_circle),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Flex(
+              direction: Axis.horizontal,
+              children: [
+                Flexible(
+                  flex: 1,
+                  child: PriorityCheckbox(
+                    onTap: () {
+                      setState(() {
+                        widget.task.priority = Priority.low;
+                        debugPrint(widget.task.toString());
+                      });
+                    },
+                      label: Priority.low.name,
+                      color: Colors.blue,
+                      isSelected: widget.task.priority == Priority.low),
+                ),
+                SizedBox(width: 8),
+                Flexible(
+                  flex: 1,
+                  child: PriorityCheckbox(
+                      onTap: () {
+                        setState(() {
+                          widget.task.priority = Priority.normal;
+                        });
+                      },
+                      label: Priority.normal.name,
+                      color: Colors.green,
+                      isSelected: widget.task.priority == Priority.normal),
+                ),
+                SizedBox(width: 8),
+                Flexible(
+                  flex: 1,
+                  child: PriorityCheckbox(
+                      onTap: () {
+                        setState(() {
+                          widget.task.priority = Priority.high;
+                        });
+                      },
+                      label: Priority.high.name,
+                      color: Colors.red,
+                      isSelected: widget.task.priority == Priority.high),
+                ),
+              ],
+            ),
+            TextField(
+              controller: _controller,
+              decoration:
+                  InputDecoration(label: Text("Add a task for today ...")),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PriorityCheckbox extends StatelessWidget {
+  final String label;
+  final Color color;
+  final bool isSelected;
+  final GestureTapCallback onTap;
+
+  const PriorityCheckbox(
+      {super.key,
+      required this.label,
+      required this.color,
+      required this.isSelected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(width: 2, color: Colors.black12),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Center(
+              child: Text(label.capitalize()),
+            ),
+            Positioned(
+                right: 4,
+                child: Icon(
+                  isSelected ? Icons.check_circle : Icons.circle_outlined,
+                  size: 18,
+                  color: color,
+                ))
+          ],
+        ),
+      ),
+    );
+  }
+}
