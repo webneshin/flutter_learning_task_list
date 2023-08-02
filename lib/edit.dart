@@ -27,7 +27,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
         onPressed: () {
           Task task = Task();
           task.name = _controller.text;
-          task.priority = Priority.low;
+          task.priority = widget.task.priority;
           if (task.isInBox) {
             task.save();
           } else {

@@ -4,7 +4,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:task_list/data.dart';
 import 'package:task_list/edit.dart';
 
-
 class BoxNames {
   static const task = 'tasks';
 }
@@ -48,7 +47,9 @@ class HomeScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
             Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => EditTaskScreen(task: Task(),),
+              builder: (context) => EditTaskScreen(
+                task: Task(),
+              ),
             ));
           },
           label: Text("Add New Task"),
@@ -190,6 +191,7 @@ class TaskItem extends StatefulWidget {
 class _TaskItemState extends State<TaskItem> {
   @override
   Widget build(BuildContext context) {
+    const double radiusSize=8;
     return InkWell(
       onTap: () {
         setState(() {
@@ -198,14 +200,14 @@ class _TaskItemState extends State<TaskItem> {
       },
       child: Container(
         height: 84,
-        padding: EdgeInsets.only(left: 16, right: 16),
+        padding: EdgeInsets.only(left: 16,),
         margin: EdgeInsets.only(
           top: 10,
         ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(radiusSize),
           color: Colors.white,
-          // boxShadow: [BoxShadow(blurRadius: 20, color: Colors.black12)],
+          boxShadow: [BoxShadow(blurRadius: 20, color: Colors.black12)],
         ),
         child: Row(
           children: [
@@ -218,13 +220,33 @@ class _TaskItemState extends State<TaskItem> {
             Expanded(
               child: Text(
                 widget.task.name,
-                overflow:TextOverflow.ellipsis ,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     decoration: widget.task.isCompleted
                         ? TextDecoration.lineThrough
                         : TextDecoration.none),
               ),
             ),
+            Positioned(
+              top: 0,
+              bottom: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                    color: widget.task.priority == Priority.high
+                        ? Colors.red
+                        : widget.task.priority == Priority.low
+                        ? Colors.blue
+                        : Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(radiusSize),
+                    bottomRight: Radius.circular(radiusSize),
+
+                  )
+                ),
+                width: radiusSize,
+
+              ),
+            )
           ],
         ),
       ),
