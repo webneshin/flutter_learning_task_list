@@ -194,12 +194,12 @@ class _TaskItemState extends State<TaskItem> {
     const double radiusSize=8;
     return InkWell(
       onTap: () {
-        setState(() {
-          widget.task.isCompleted = !widget.task.isCompleted;
-        });
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+          return EditTaskScreen(task: widget.task,);
+        },));
       },
       child: Container(
-        height: 84,
+        height: 55,
         padding: EdgeInsets.only(left: 16,),
         margin: EdgeInsets.only(
           top: 10,
@@ -213,6 +213,12 @@ class _TaskItemState extends State<TaskItem> {
           children: [
             MyCheckBox(
               value: widget.task.isCompleted,
+              onTap: () {
+                setState(() {
+                  widget.task.isCompleted=!widget.task.isCompleted;
+                  widget.task.save();
+                });
+              },
             ),
             SizedBox(
               width: 8,
@@ -257,21 +263,25 @@ class _TaskItemState extends State<TaskItem> {
 class MyCheckBox extends StatelessWidget {
   final double size = 20;
   final bool value;
+  final GestureTapCallback onTap;
 
-  const MyCheckBox({super.key, required this.value});
+  const MyCheckBox({super.key, required this.value, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return !value
-        ? Icon(
-            Icons.circle_outlined,
-            size: size,
-            color: Colors.grey,
-          )
-        : Icon(
-            Icons.check_circle,
-            size: size,
-            color: Colors.deepPurple,
-          );
+    return InkWell(
+      onTap: onTap,
+      child: !value
+          ? Icon(
+              Icons.circle_outlined,
+              size: size,
+              color: Colors.grey,
+            )
+          : Icon(
+              Icons.check_circle,
+              size: size,
+              color: Colors.deepPurple,
+            ),
+    );
   }
 }
