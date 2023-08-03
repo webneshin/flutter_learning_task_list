@@ -112,60 +112,70 @@ class HomeScreen extends StatelessWidget {
               child: ValueListenableBuilder<Box<Task>>(
                 valueListenable: box.listenable(),
                 builder: (context, box, child) {
-                  return ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                    itemCount: box.values.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Today",
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge),
-                                const SizedBox(
-                                  height: 2,
-                                ),
-                                Container(
-                                  width: 50,
-                                  height: 4,
-                                  decoration: BoxDecoration(
-                                      color: Colors.purple,
-                                      borderRadius: BorderRadius.circular(10)),
-                                )
-                              ],
-                            ),
-                            MaterialButton(
-                              color: Colors.red.shade200,
-                              disabledColor: Colors.grey.shade200,
-                              elevation: 0,
-                              onPressed: box.values.isEmpty ? null : () {},
-                              child: const Row(
+                  if (box.isNotEmpty) {
+                    return ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                      itemCount: box.values.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "Delet all",
+                                  Text("Today",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge),
+                                  const SizedBox(
+                                    height: 2,
                                   ),
-                                  SizedBox(
-                                    width: 4,
-                                  ),
-                                  Icon(
-                                    Icons.delete,
-                                    size: 16,
+                                  Container(
+                                    width: 50,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                        color: Colors.purple,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
                                   )
                                 ],
                               ),
-                            )
-                          ],
-                        );
-                      } else {
-                        final Task task = box.values.toList()[index - 1];
-                        return TaskItem(task: task);
-                      }
-                    },
-                  );
+                              MaterialButton(
+                                color: Colors.red.shade200,
+                                disabledColor: Colors.grey.shade200,
+                                elevation: 0,
+                                onPressed: box.values.isEmpty
+                                    ? null
+                                    : () {
+                                        box.clear();
+                                      },
+                                child: const Row(
+                                  children: [
+                                    Text(
+                                      "Delet all",
+                                    ),
+                                    SizedBox(
+                                      width: 4,
+                                    ),
+                                    Icon(
+                                      Icons.delete,
+                                      size: 16,
+                                    )
+                                  ],
+                                ),
+                              )
+                            ],
+                          );
+                        } else {
+                          final Task task = box.values.toList()[index - 1];
+                          return TaskItem(task: task);
+                        }
+                      },
+                    );
+                  } else {
+                    return const EmptyState();
+                  }
                 },
               ),
             ),
@@ -191,16 +201,25 @@ class TaskItem extends StatefulWidget {
 class _TaskItemState extends State<TaskItem> {
   @override
   Widget build(BuildContext context) {
-    const double radiusSize=8;
+    const double radiusSize = 8;
     return InkWell(
       onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-          return EditTaskScreen(task: widget.task,);
-        },));
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) {
+            return EditTaskScreen(
+              task: widget.task,
+            );
+          },
+        ));
+      },
+      onLongPress: () {
+        widget.task.delete();
       },
       child: Container(
         height: 55,
-        padding: const EdgeInsets.only(left: 16,),
+        padding: const EdgeInsets.only(
+          left: 16,
+        ),
         margin: const EdgeInsets.only(
           top: 10,
         ),
@@ -215,7 +234,7 @@ class _TaskItemState extends State<TaskItem> {
               value: widget.task.isCompleted,
               onTap: () {
                 setState(() {
-                  widget.task.isCompleted=!widget.task.isCompleted;
+                  widget.task.isCompleted = !widget.task.isCompleted;
                   widget.task.save();
                 });
               },
@@ -241,16 +260,13 @@ class _TaskItemState extends State<TaskItem> {
                     color: widget.task.priority == Priority.high
                         ? Colors.red
                         : widget.task.priority == Priority.low
-                        ? Colors.blue
-                        : Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(radiusSize),
-                    bottomRight: Radius.circular(radiusSize),
-
-                  )
-                ),
+                            ? Colors.blue
+                            : Colors.white,
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(radiusSize),
+                      bottomRight: Radius.circular(radiusSize),
+                    )),
                 width: radiusSize,
-
               ),
             )
           ],
@@ -282,6 +298,29 @@ class MyCheckBox extends StatelessWidget {
               size: size,
               color: Colors.deepPurple,
             ),
+    );
+  }
+}
+
+class EmptyState extends StatelessWidget {
+  const EmptyState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.hourglass_empty,
+            size: 40,
+          ),
+          SizedBox(
+            height: 12,
+          ),
+          Text("Your task list is empty!"),
+        ],
+      ),
     );
   }
 }
