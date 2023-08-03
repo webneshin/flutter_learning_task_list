@@ -252,22 +252,19 @@ class _TaskItemState extends State<TaskItem> {
                         : TextDecoration.none),
               ),
             ),
-            Positioned(
-              top: 0,
-              bottom: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                    color: widget.task.priority == Priority.high
-                        ? Colors.red
-                        : widget.task.priority == Priority.low
-                            ? Colors.blue
-                            : Colors.white,
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(radiusSize),
-                      bottomRight: Radius.circular(radiusSize),
-                    )),
-                width: radiusSize,
-              ),
+            Container(
+              // height: 10,
+              decoration: BoxDecoration(
+                  color: widget.task.priority == Priority.high
+                      ? Colors.red
+                      : widget.task.priority == Priority.low
+                          ? Colors.blue
+                          : Colors.white,
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(radiusSize),
+                    bottomRight: Radius.circular(radiusSize),
+                  )),
+              width: radiusSize,
             )
           ],
         ),
