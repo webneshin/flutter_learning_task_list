@@ -28,13 +28,20 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
           colorScheme: const ColorScheme.light(
               primary: Color(0xff794CFF), background: Color(0xffF3F5F8))),
-      home: const HomeScreen(),
+      home: HomeScreen(),
     );
   }
 }
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final TextEditingController _serchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -47,9 +54,10 @@ class HomeScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
             Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => EditTaskScreen(
-                task: Task(),
-              ),
+              builder: (context) =>
+                  EditTaskScreen(
+                    task: Task(),
+                  ),
             ));
           },
           label: const Text("Add New Task"),
@@ -63,18 +71,19 @@ class HomeScreen extends StatelessWidget {
                   gradient: LinearGradient(
                       colors: [Colors.purpleAccent, Colors.deepPurple])),
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: EdgeInsets.all(12.0),
                 child: Column(children: [
                   Row(
                     children: [
                       Expanded(
                           child: Text(
-                        "To Do List",
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge
-                            ?.apply(color: Colors.white),
-                      )),
+                            "To Do List",
+                            style: Theme
+                                .of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.apply(color: Colors.white),
+                          )),
                       const Icon(
                         Icons.cloud_done,
                         color: Colors.white,
@@ -95,8 +104,14 @@ class HomeScreen extends StatelessWidget {
                               blurRadius: 20,
                               color: Colors.black.withOpacity(0.1)),
                         ]),
-                    child: const TextField(
-                      decoration: InputDecoration(
+                    child: TextField(
+                      onChanged: (value) {
+                        setState(() {
+
+                        });
+                      },
+                      controller: _serchController,
+                      decoration: const InputDecoration(
                         border: InputBorder.none,
                         prefixIconColor: Colors.black12,
                         prefixIcon: Icon(Icons.search),
@@ -112,10 +127,17 @@ class HomeScreen extends StatelessWidget {
               child: ValueListenableBuilder<Box<Task>>(
                 valueListenable: box.listenable(),
                 builder: (context, box, child) {
-                  if (box.isNotEmpty) {
+                  final items;
+                  if (_serchController.text.isEmpty) {
+                    items = box.values.toList();
+                  } else {
+                    items = box.values.where((task) =>
+                        task.name.contains(_serchController.text)).toList();
+                  }
+                  if (items.isNotEmpty) {
                     return ListView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                      itemCount: box.values.length + 1,
+                      itemCount: items.length + 1,
                       itemBuilder: (context, index) {
                         if (index == 0) {
                           return Row(
@@ -125,7 +147,8 @@ class HomeScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text("Today",
-                                      style: Theme.of(context)
+                                      style: Theme
+                                          .of(context)
                                           .textTheme
                                           .bodyLarge),
                                   const SizedBox(
@@ -137,7 +160,7 @@ class HomeScreen extends StatelessWidget {
                                     decoration: BoxDecoration(
                                         color: Colors.purple,
                                         borderRadius:
-                                            BorderRadius.circular(10)),
+                                        BorderRadius.circular(10)),
                                   )
                                 ],
                               ),
@@ -148,8 +171,8 @@ class HomeScreen extends StatelessWidget {
                                 onPressed: box.values.isEmpty
                                     ? null
                                     : () {
-                                        box.clear();
-                                      },
+                                  box.clear();
+                                },
                                 child: const Row(
                                   children: [
                                     Text(
@@ -168,13 +191,13 @@ class HomeScreen extends StatelessWidget {
                             ],
                           );
                         } else {
-                          final Task task = box.values.toList()[index - 1];
+                          final Task task = items.toList()[index - 1];
                           return TaskItem(task: task);
                         }
                       },
                     );
                   } else {
-                    return const EmptyState();
+                    return EmptyState(search: _serchController.text,);
                   }
                 },
               ),
@@ -258,8 +281,8 @@ class _TaskItemState extends State<TaskItem> {
                   color: widget.task.priority == Priority.high
                       ? Colors.red
                       : widget.task.priority == Priority.low
-                          ? Colors.blue
-                          : Colors.white,
+                      ? Colors.blue
+                      : Colors.white,
                   borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(radiusSize),
                     bottomRight: Radius.circular(radiusSize),
@@ -286,25 +309,26 @@ class MyCheckBox extends StatelessWidget {
       onTap: onTap,
       child: !value
           ? Icon(
-              Icons.circle_outlined,
-              size: size,
-              color: Colors.grey,
-            )
+        Icons.circle_outlined,
+        size: size,
+        color: Colors.grey,
+      )
           : Icon(
-              Icons.check_circle,
-              size: size,
-              color: Colors.deepPurple,
-            ),
+        Icons.check_circle,
+        size: size,
+        color: Colors.deepPurple,
+      ),
     );
   }
 }
 
 class EmptyState extends StatelessWidget {
-  const EmptyState({super.key});
+  final String search;
+  const EmptyState({super.key, required this.search});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -315,7 +339,7 @@ class EmptyState extends StatelessWidget {
           SizedBox(
             height: 12,
           ),
-          Text("Your task list is empty!"),
+          Text(search.isNotEmpty?"Your Search task list is empty!":"Your task list is empty!"),
         ],
       ),
     );
