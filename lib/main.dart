@@ -33,15 +33,10 @@ class MainApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _serchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
+  final ValueNotifier<String> searchKeyboardNotifier = ValueNotifier('');
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +49,9 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
             Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) =>
-                  EditTaskScreen(
-                    task: Task(),
-                  ),
+              builder: (context) => EditTaskScreen(
+                task: Task(),
+              ),
             ));
           },
           label: const Text("Add New Task"),
@@ -71,19 +65,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   gradient: LinearGradient(
                       colors: [Colors.purpleAccent, Colors.deepPurple])),
               child: Padding(
-                padding: EdgeInsets.all(12.0),
+                padding: const EdgeInsets.all(12.0),
                 child: Column(children: [
                   Row(
                     children: [
                       Expanded(
                           child: Text(
-                            "To Do List",
-                            style: Theme
-                                .of(context)
-                                .textTheme
-                                .titleLarge
-                                ?.apply(color: Colors.white),
-                          )),
+                        "To Do List",
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.apply(color: Colors.white),
+                      )),
                       const Icon(
                         Icons.cloud_done,
                         color: Colors.white,
@@ -106,12 +99,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ]),
                     child: TextField(
                       onChanged: (value) {
-                        setState(() {
-
-                        });
+                        searchKeyboardNotifier.value=_searchController.text;
                       },
-                      controller: _serchController,
+                      controller: _searchController,
                       decoration: const InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.never,
                         border: InputBorder.none,
                         prefixIconColor: Colors.black12,
                         prefixIcon: Icon(Icons.search),
@@ -124,81 +116,89 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Expanded(
-              child: ValueListenableBuilder<Box<Task>>(
-                valueListenable: box.listenable(),
-                builder: (context, box, child) {
-                  final items;
-                  if (_serchController.text.isEmpty) {
-                    items = box.values.toList();
-                  } else {
-                    items = box.values.where((task) =>
-                        task.name.contains(_serchController.text)).toList();
-                  }
-                  if (items.isNotEmpty) {
-                    return ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                      itemCount: items.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+              child: ValueListenableBuilder<String>(
+                valueListenable: searchKeyboardNotifier,
+                builder: (context, value, child) {
+                  return ValueListenableBuilder<Box<Task>>(
+                    valueListenable: box.listenable(),
+                    builder: (context, box, child) {
+                      final List<Task> items;
+                      if (_searchController.text.isEmpty) {
+                        items = box.values.toList();
+                      } else {
+                        items = box.values
+                            .where(
+                                (task) => task.name.contains(_searchController.text))
+                            .toList();
+                      }
+                      if (items.isNotEmpty) {
+                        return ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                          itemCount: items.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text("Today",
-                                      style: Theme
-                                          .of(context)
-                                          .textTheme
-                                          .bodyLarge),
-                                  const SizedBox(
-                                    height: 2,
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text("Today",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge),
+                                      const SizedBox(
+                                        height: 2,
+                                      ),
+                                      Container(
+                                        width: 50,
+                                        height: 4,
+                                        decoration: BoxDecoration(
+                                            color: Colors.purple,
+                                            borderRadius:
+                                            BorderRadius.circular(10)),
+                                      )
+                                    ],
                                   ),
-                                  Container(
-                                    width: 50,
-                                    height: 4,
-                                    decoration: BoxDecoration(
-                                        color: Colors.purple,
-                                        borderRadius:
-                                        BorderRadius.circular(10)),
+                                  MaterialButton(
+                                    color: Colors.red.shade200,
+                                    disabledColor: Colors.grey.shade200,
+                                    elevation: 0,
+                                    onPressed: box.values.isEmpty
+                                        ? null
+                                        : () {
+                                      box.clear();
+                                    },
+                                    child: const Row(
+                                      children: [
+                                        Text(
+                                          "Delet all",
+                                        ),
+                                        SizedBox(
+                                          width: 4,
+                                        ),
+                                        Icon(
+                                          Icons.delete,
+                                          size: 16,
+                                        )
+                                      ],
+                                    ),
                                   )
                                 ],
-                              ),
-                              MaterialButton(
-                                color: Colors.red.shade200,
-                                disabledColor: Colors.grey.shade200,
-                                elevation: 0,
-                                onPressed: box.values.isEmpty
-                                    ? null
-                                    : () {
-                                  box.clear();
-                                },
-                                child: const Row(
-                                  children: [
-                                    Text(
-                                      "Delet all",
-                                    ),
-                                    SizedBox(
-                                      width: 4,
-                                    ),
-                                    Icon(
-                                      Icons.delete,
-                                      size: 16,
-                                    )
-                                  ],
-                                ),
-                              )
-                            ],
-                          );
-                        } else {
-                          final Task task = items.toList()[index - 1];
-                          return TaskItem(task: task);
-                        }
-                      },
-                    );
-                  } else {
-                    return EmptyState(search: _serchController.text,);
-                  }
+                              );
+                            } else {
+                              final Task task = items.toList()[index - 1];
+                              return TaskItem(task: task);
+                            }
+                          },
+                        );
+                      } else {
+                        return EmptyState(
+                          search: _searchController.text,
+                        );
+                      }
+                    },
+                  );
                 },
               ),
             ),
@@ -208,6 +208,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+
 
 class TaskItem extends StatefulWidget {
   const TaskItem({
@@ -281,8 +283,8 @@ class _TaskItemState extends State<TaskItem> {
                   color: widget.task.priority == Priority.high
                       ? Colors.red
                       : widget.task.priority == Priority.low
-                      ? Colors.blue
-                      : Colors.white,
+                          ? Colors.blue
+                          : Colors.white,
                   borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(radiusSize),
                     bottomRight: Radius.circular(radiusSize),
@@ -309,21 +311,22 @@ class MyCheckBox extends StatelessWidget {
       onTap: onTap,
       child: !value
           ? Icon(
-        Icons.circle_outlined,
-        size: size,
-        color: Colors.grey,
-      )
+              Icons.circle_outlined,
+              size: size,
+              color: Colors.grey,
+            )
           : Icon(
-        Icons.check_circle,
-        size: size,
-        color: Colors.deepPurple,
-      ),
+              Icons.check_circle,
+              size: size,
+              color: Colors.deepPurple,
+            ),
     );
   }
 }
 
 class EmptyState extends StatelessWidget {
   final String search;
+
   const EmptyState({super.key, required this.search});
 
   @override
@@ -332,14 +335,16 @@ class EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.hourglass_empty,
             size: 40,
           ),
-          SizedBox(
+          const SizedBox(
             height: 12,
           ),
-          Text(search.isNotEmpty?"Your Search task list is empty!":"Your task list is empty!"),
+          Text(search.isNotEmpty
+              ? "Your Search task list is empty!"
+              : "Your task list is empty!"),
         ],
       ),
     );
