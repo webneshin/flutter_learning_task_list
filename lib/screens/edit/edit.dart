@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:task_list/data.dart';
+import 'package:task_list/data/data.dart';
 import 'package:task_list/helper.dart';
 import 'package:task_list/main.dart';
 
