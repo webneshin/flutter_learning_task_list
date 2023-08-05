@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:task_list/data/data.dart';
 import 'package:task_list/data/repo/repository.dart';
 import 'package:task_list/screens/edit/edit.dart';
+import 'package:task_list/screens/home/task_list_bloc.dart';
 import 'package:task_list/widgets.dart';
 
 import '../../main.dart';
@@ -12,7 +14,6 @@ class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
   final TextEditingController _searchController = TextEditingController();
-  final ValueNotifier<String> searchKeyboardNotifier = ValueNotifier('');
 
   @override
   Widget build(BuildContext context) {
@@ -31,95 +32,100 @@ class HomeScreen extends StatelessWidget {
           },
           label: const Text("Add New Task"),
           icon: const Icon(Icons.add_circle)),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              height: 110,
-              decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                      colors: [Colors.purpleAccent, Colors.deepPurple])),
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(children: [
-                  Row(
-                    children: [
-                      Expanded(
-                          child: Text(
-                        "To Do List",
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge
-                            ?.apply(color: Colors.white),
-                      )),
-                      const Icon(
-                        Icons.cloud_done,
-                        color: Colors.white,
-                      )
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  Container(
-                    height: 38,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(38 / 2),
-                        boxShadow: [
-                          BoxShadow(
-                              blurRadius: 20,
-                              color: Colors.black.withOpacity(0.1)),
-                        ]),
-                    child: TextField(
-                      onChanged: (value) {
-                        searchKeyboardNotifier.value = _searchController.text;
-                      },
-                      controller: _searchController,
-                      decoration: const InputDecoration(
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
-                        border: InputBorder.none,
-                        prefixIconColor: Colors.black12,
-                        prefixIcon: Icon(Icons.search),
-                        labelStyle: TextStyle(color: Colors.black12),
-                        label: Text("Search task ..."),
+      body: BlocProvider<TaskListBloc>(
+        create: (context) => TaskListBloc(context.read<Repository<Task>>()),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Container(
+                height: 110,
+                decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                        colors: [Colors.purpleAccent, Colors.deepPurple])),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(children: [
+                    Row(
+                      children: [
+                        Expanded(
+                            child: Text(
+                          "To Do List",
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.apply(color: Colors.white),
+                        )),
+                        const Icon(
+                          Icons.cloud_done,
+                          color: Colors.white,
+                        )
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    Container(
+                      height: 38,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(38 / 2),
+                          boxShadow: [
+                            BoxShadow(
+                                blurRadius: 20,
+                                color: Colors.black.withOpacity(0.1)),
+                          ]),
+                      child: TextField(
+                        onChanged: (value) {
+                          context
+                              .read<TaskListBloc>()
+                              .add(TaskListEventSearch(value));
+                        },
+                        controller: _searchController,
+                        decoration: const InputDecoration(
+                          floatingLabelBehavior: FloatingLabelBehavior.never,
+                          border: InputBorder.none,
+                          prefixIconColor: Colors.black12,
+                          prefixIcon: Icon(Icons.search),
+                          labelStyle: TextStyle(color: Colors.black12),
+                          label: Text("Search task ..."),
+                        ),
                       ),
                     ),
-                  ),
-                ]),
+                  ]),
+                ),
               ),
-            ),
-            Expanded(
-              child: ValueListenableBuilder<String>(
-                valueListenable: searchKeyboardNotifier,
-                builder: (context, value, child) {
-                  return Consumer<Repository<Task>>(
-                    builder: (context, repository, child) {
-                      return FutureBuilder<List<Task>>(
-                        future: repository.getAll(searchKeyword: _searchController.text),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData){
-                            if(snapshot.data!.isNotEmpty){
-
-                              return TaskList(items: snapshot.data!);
-                            } else {
-                              return EmptyState(search: _searchController.text);
-                            }
-                          } else {
-                            return CircularProgressIndicator();
-                          }
-
-                        },);
-                    },
-                  );
-
-
-
-                },
+              Expanded(
+                child: Consumer<Repository<Task>>(
+                  builder: (context, value, child) {
+                    context.read<TaskListBloc>().add(TaskListEventStarted());
+                    return BlocBuilder<TaskListBloc, TaskListState>(
+                      builder: (BuildContext context, state) {
+                        if (state is TaskListStateSuccess) {
+                          return TaskList(
+                            items: state.items,
+                          );
+                        } else if (state is TaskListStateEmpty) {
+                          return EmptyState(search: _searchController.text);
+                        } else if (state is TaskListStateLoading ||
+                            state is TaskListStateInitial) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (state is TaskListStateError) {
+                          return Center(
+                            child: Text(state.errorMessage),
+                          );
+                        } else {
+                          throw Exception('state is not valid ...');
+                        }
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -165,8 +171,7 @@ class TaskList extends StatelessWidget {
                 disabledColor: Colors.grey.shade200,
                 elevation: 0,
                 onPressed: () {
-                  final repository = Provider.of<Repository<Task>>(context,listen: false);
-                  repository.deleteAll();
+                  context.read<TaskListBloc>().add(TaskListEventDeleteAll());
                 },
                 child: const Row(
                   children: [
