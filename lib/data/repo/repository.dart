@@ -1,28 +1,34 @@
+import 'package:flutter/cupertino.dart';
 import 'package:task_list/data/source/source.dart';
 
-class Repository<T> implements DataSource<T> {
+class Repository<T> with ChangeNotifier implements DataSource<T> {
   final DataSource<T> localDataSource;
 
   Repository(this.localDataSource);
 
   @override
-  Future<T> createOrUpdate(T obj) {
-    return localDataSource.createOrUpdate(obj);
+  Future<T> createOrUpdate(T obj) async {
+    final T resualt = await localDataSource.createOrUpdate(obj);
+    notifyListeners();
+    return resualt;
   }
 
   @override
-  Future<void> delete(T obj) {
-    return localDataSource.delete(obj);
+  Future<void> delete(T obj) async {
+    await localDataSource.delete(obj);
+    notifyListeners();
   }
 
   @override
-  Future<void> deleteAll() {
-    return localDataSource.deleteAll();
+  Future<void> deleteAll() async {
+    await localDataSource.deleteAll();
+    notifyListeners();
   }
 
   @override
-  Future<void> deleteById(id) {
-    return localDataSource.deleteById(id);
+  Future<void> deleteById(id) async {
+    await localDataSource.deleteById(id);
+    notifyListeners();
   }
 
   @override

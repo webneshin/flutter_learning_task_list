@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:task_list/data/data.dart';
+import 'package:task_list/data/repo/repository.dart';
 import 'package:task_list/screens/edit/edit.dart';
 import 'package:task_list/widgets.dart';
 
@@ -14,7 +16,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box<Task>(BoxNames.task);
     return Scaffold(
       // appBar: AppBar(
       //   title: Text("To Do List"),
@@ -93,94 +94,102 @@ class HomeScreen extends StatelessWidget {
               child: ValueListenableBuilder<String>(
                 valueListenable: searchKeyboardNotifier,
                 builder: (context, value, child) {
-                  return ValueListenableBuilder<Box<Task>>(
-                    valueListenable: box.listenable(),
-                    builder: (context, box, child) {
-                      final List<Task> items;
-                      if (_searchController.text.isEmpty) {
-                        items = box.values.toList();
-                      } else {
-                        items = box.values
-                            .where((task) =>
-                                task.name.contains(_searchController.text))
-                            .toList();
-                      }
-                      if (items.isNotEmpty) {
-                        return ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                          itemCount: items.length + 1,
-                          itemBuilder: (context, index) {
-                            if (index == 0) {
-                              return Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text("Today",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyLarge),
-                                      const SizedBox(
-                                        height: 2,
-                                      ),
-                                      Container(
-                                        width: 50,
-                                        height: 4,
-                                        decoration: BoxDecoration(
-                                            color: Colors.purple,
-                                            borderRadius:
-                                                BorderRadius.circular(10)),
-                                      )
-                                    ],
-                                  ),
-                                  MaterialButton(
-                                    color: Colors.red.shade200,
-                                    disabledColor: Colors.grey.shade200,
-                                    elevation: 0,
-                                    onPressed: box.values.isEmpty
-                                        ? null
-                                        : () {
-                                            box.clear();
-                                          },
-                                    child: const Row(
-                                      children: [
-                                        Text(
-                                          "Delet all",
-                                        ),
-                                        SizedBox(
-                                          width: 4,
-                                        ),
-                                        Icon(
-                                          Icons.delete,
-                                          size: 16,
-                                        )
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              );
+                  return Consumer<Repository<Task>>(
+                    builder: (context, repository, child) {
+                      return FutureBuilder<List<Task>>(
+                        future: repository.getAll(searchKeyword: _searchController.text),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData){
+                            if(snapshot.data!.isNotEmpty){
+
+                              return TaskList(items: snapshot.data!);
                             } else {
-                              final Task task = items.toList()[index - 1];
-                              return TaskItem(task: task);
+                              return EmptyState(search: _searchController.text);
                             }
-                          },
-                        );
-                      } else {
-                        return EmptyState(
-                          search: _searchController.text,
-                        );
-                      }
+                          } else {
+                            return CircularProgressIndicator();
+                          }
+
+                        },);
                     },
                   );
+
+
+
                 },
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class TaskList extends StatelessWidget {
+  const TaskList({
+    super.key,
+    required this.items,
+  });
+
+  final List<Task> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+      itemCount: items.length + 1,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Today", style: Theme.of(context).textTheme.bodyLarge),
+                  const SizedBox(
+                    height: 2,
+                  ),
+                  Container(
+                    width: 50,
+                    height: 4,
+                    decoration: BoxDecoration(
+                        color: Colors.purple,
+                        borderRadius: BorderRadius.circular(10)),
+                  )
+                ],
+              ),
+              MaterialButton(
+                color: Colors.red.shade200,
+                disabledColor: Colors.grey.shade200,
+                elevation: 0,
+                onPressed: () {
+                  final repository = Provider.of<Repository<Task>>(context,listen: false);
+                  repository.deleteAll();
+                },
+                child: const Row(
+                  children: [
+                    Text(
+                      "Delet all",
+                    ),
+                    SizedBox(
+                      width: 4,
+                    ),
+                    Icon(
+                      Icons.delete,
+                      size: 16,
+                    )
+                  ],
+                ),
+              )
+            ],
+          );
+        } else {
+          final Task task = items.toList()[index - 1];
+          return TaskItem(task: task);
+        }
+      },
     );
   }
 }

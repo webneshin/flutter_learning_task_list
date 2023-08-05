@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:task_list/data/data.dart';
+import 'package:task_list/data/repo/repository.dart';
 import 'package:task_list/helper.dart';
 import 'package:task_list/main.dart';
 
@@ -29,13 +31,11 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
           // Task task = ;
           widget.task.name = _controller.text;
           widget.task.priority = widget.task.priority;
-          if (widget.task.isInBox) {
-            widget.task.name = _controller.text;
-            widget.task.save();
-          } else {
-            final Box<Task> box = Hive.box(BoxNames.task);
-            box.add(widget.task);
-          }
+
+          final repository =
+              Provider.of<Repository<Task>>(context, listen: false);
+          repository.createOrUpdate(widget.task);
+
           Navigator.of(context).pop();
         },
         label: const Text("Save Change"),
@@ -91,8 +91,8 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
             ),
             TextField(
               controller: _controller,
-              decoration:
-                  const InputDecoration(label: Text("Add a task for today ...")),
+              decoration: const InputDecoration(
+                  label: Text("Add a task for today ...")),
             )
           ],
         ),

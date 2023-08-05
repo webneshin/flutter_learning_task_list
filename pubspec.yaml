@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   hive_flutter: ^1.1.0
+  provider: ^6.0.5
 
 dev_dependencies:
   flutter_test:
