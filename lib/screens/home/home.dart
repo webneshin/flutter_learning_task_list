@@ -75,21 +75,25 @@ class HomeScreen extends StatelessWidget {
                                 blurRadius: 20,
                                 color: Colors.black.withOpacity(0.1)),
                           ]),
-                      child: TextField(
-                        onChanged: (value) {
-                          context
-                              .read<TaskListBloc>()
-                              .add(TaskListEventSearch(value));
-                        },
-                        controller: _searchController,
-                        decoration: const InputDecoration(
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          border: InputBorder.none,
-                          prefixIconColor: Colors.black12,
-                          prefixIcon: Icon(Icons.search),
-                          labelStyle: TextStyle(color: Colors.black12),
-                          label: Text("Search task ..."),
-                        ),
+                      child: Builder(
+                        builder: (context) {
+                          return TextField(
+                            onChanged: (value) {
+                              context
+                                  .read<TaskListBloc>()
+                                  .add(TaskListEventSearch(value));
+                            },
+                            controller: _searchController,
+                            decoration: const InputDecoration(
+                              floatingLabelBehavior: FloatingLabelBehavior.never,
+                              border: InputBorder.none,
+                              prefixIconColor: Colors.black12,
+                              prefixIcon: Icon(Icons.search),
+                              labelStyle: TextStyle(color: Colors.black12),
+                              label: Text("Search task ..."),
+                            ),
+                          );
+                        }
                       ),
                     ),
                   ]),
