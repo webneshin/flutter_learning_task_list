@@ -43,7 +43,8 @@ class HiveTaskDataSource implements DataSource<Task> {
     List<Task> l;
     if (searchKeyword.isNotEmpty) {
       l = box.values
-          .where((task) => task.name.contains(searchKeyword))
+          .where((task) =>
+              task.name.toLowerCase().contains(searchKeyword.toLowerCase()))
           .toList();
     } else {
       l = box.values.toList();
