@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:task_list/data/data.dart';
 import 'package:task_list/data/repo/repository.dart';
 import 'package:task_list/screens/edit/edit.dart';
+import 'package:task_list/screens/edit/edit_task_cubit.dart';
 import 'package:task_list/screens/home/task_list_bloc.dart';
 import 'package:task_list/widgets.dart';
 
@@ -25,8 +26,10 @@ class HomeScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
             Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => EditTaskScreen(
-                task: Task(),
+              builder: (context) => BlocProvider<EditTaskCubit>(
+                create: (context) =>
+                    EditTaskCubit(Task(), context.read<Repository<Task>>()),
+                child: const EditTaskScreen(),
               ),
             ));
           },
@@ -75,26 +78,24 @@ class HomeScreen extends StatelessWidget {
                                 blurRadius: 20,
                                 color: Colors.black.withOpacity(0.1)),
                           ]),
-                      child: Builder(
-                        builder: (context) {
-                          return TextField(
-                            onChanged: (value) {
-                              context
-                                  .read<TaskListBloc>()
-                                  .add(TaskListEventSearch(value));
-                            },
-                            controller: _searchController,
-                            decoration: const InputDecoration(
-                              floatingLabelBehavior: FloatingLabelBehavior.never,
-                              border: InputBorder.none,
-                              prefixIconColor: Colors.black12,
-                              prefixIcon: Icon(Icons.search),
-                              labelStyle: TextStyle(color: Colors.black12),
-                              label: Text("Search task ..."),
-                            ),
-                          );
-                        }
-                      ),
+                      child: Builder(builder: (context) {
+                        return TextField(
+                          onChanged: (value) {
+                            context
+                                .read<TaskListBloc>()
+                                .add(TaskListEventSearch(value));
+                          },
+                          controller: _searchController,
+                          decoration: const InputDecoration(
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            border: InputBorder.none,
+                            prefixIconColor: Colors.black12,
+                            prefixIcon: Icon(Icons.search),
+                            labelStyle: TextStyle(color: Colors.black12),
+                            label: Text("Search task ..."),
+                          ),
+                        );
+                      }),
                     ),
                   ]),
                 ),
@@ -223,8 +224,9 @@ class _TaskItemState extends State<TaskItem> {
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
           builder: (context) {
-            return EditTaskScreen(
-              task: widget.task,
+            return BlocProvider<EditTaskCubit>(
+              create: (context) =>  EditTaskCubit(widget.task, context.read<Repository<Task>>()),
+              child: const EditTaskScreen(),
             );
           },
         ));
